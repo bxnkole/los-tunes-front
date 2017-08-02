@@ -1,76 +1,95 @@
 <template>
-  <div id="app">
-  
-    <el-row type="flex" justify="center">
-      <el-col :span="12">
-        <img src="./assets/logo.png">
-        <h2>Welcome to LasGidi Tunes</h2>
-  
-        <el-button type="primary" @click="dialogFormVisible = true" icon="check">Sign In</el-button>
-  
-      </el-col>
-    </el-row>
-  
-    <el-dialog title="Sign In" :visible.sync="dialogFormVisible">
-      <el-form :label-position="'top'" :label-width="'120px'">
-        <el-form-item label="Username">
-          <el-input v-model="user.username" auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="Password">
-          <el-input type="Password" v-model="user.password" auto-complete="off"></el-input>
-        </el-form-item>
-      </el-form>
-  
-      <el-row>
-        <el-button type="text">Forgot Password</el-button>
-      </el-row>
-  
-      <el-row :type="'flex'">
-        <el-col :span="3">
-          <el-button @click="signIn" type="primary">Sign In</el-button>
-        </el-col>
-        <el-col :span="8">
-          <el-button type="primary">Sign In With Facebook</el-button>
-        </el-col>
-        <el-col :span="2">
-          <p>OR</p>
-        </el-col>
-        <el-col :span="8">
-          <el-button type="primary">Sign In With Twitter</el-button>
-        </el-col>
-      </el-row>
-  
-      <el-row>
-        Don't have an account yet?
-        <el-button type="text">Sign Up Now!</el-button>
-      </el-row>
-    </el-dialog>
-  </div>
+  <v-app light>
+    <v-navigation-drawer persistent :mini-variant="miniVariant" :clipped="clipped" v-model="drawer" enable-resize-watcher>
+      <v-list>
+        <v-list-tile value="true" v-for="(item, i) in items" :key="i">
+          <v-list-tile-action>
+            <v-icon light v-html="item.icon"></v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title v-text="item.title"></v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-toolbar fixed>
+      <v-toolbar-side-icon @click.native.stop="drawer = !drawer" light></v-toolbar-side-icon>
+      <v-toolbar-title v-text="title"></v-toolbar-title>
+    </v-toolbar>
+
+    <main>
+      <v-container fluid>
+        <v-slide-y-transition mode="out-in">
+          <v-layout column align-center>
+            <img src="/static/v.png" alt="Vuetify.js" class="mb-5">
+            <h5> Welcome To Lasgidi Tunes </h5>
+            <v-btn primary round dark @click.stop="dialog = true">Sign In</v-btn>
+            <v-dialog v-model="dialog" :width="'500px'">
+              <v-card>
+                <v-alert error dismissible v-model="loginError"> {{loginErrorMessage}} </v-alert>
+                <v-card-title>
+                  <p class="headline text-md-center">Sign In to LasGidi Tunes</p>
+                </v-card-title>
+                <v-card-text>
+                  <v-text-field label="Username" required v-model="user.username"></v-text-field>
+                  <v-text-field label="Password" type="password" v-model="user.password" required></v-text-field>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn primary dark @click.native="signIn">Sign In</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </v-layout>
+        </v-slide-y-transition>
+      </v-container>
+    </main>
+    <v-footer :fixed="fixed">
+      <span>&copy; 2017</span>
+    </v-footer>
+  </v-app>
 </template>
 
 <script>
-
+import auth from './auth'
 
 export default {
-  name: 'app',
   data() {
     return {
-      msg: 'Welcome to Your Vue.js App',
-      dialogFormVisible: false,
+      miniVariant: false,
+      clipped: false,
+      drawer: true,
+      fixed: false,
+      items: [
+        { icon: 'bubble_chart', title: 'Inspire' }
+      ],
+      rightDrawer: false,
+      title: 'LasGidi Tunes',
+      dialog: false,
       user: {
         username: '',
-        password: ''
-      }
+        password: '',
+        authenticated: false
+      },
+      loginError: false,
+      loginErrorMessage: ''
     }
   },
   methods: {
     signIn() {
-      console.log(this.user.username)
+      this.loginError = false;
+      auth.signIn(this, this.user);
+    }
+  },
+  computed: {
+    isUserAuthenticated() {
+      return this.user.authenticated;
     }
   }
 }
 </script>
 
-<style>
-
+<style lang="stylus">
+  @import './stylus/main'
 </style>
